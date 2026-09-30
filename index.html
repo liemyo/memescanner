@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meme Hunter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d0a;--panel:#11140f;--panel2:#161a13;--line:#232a1d;--ink:#e6ecdf;--mute:#7d8a72;--dim:#4c5644;
+  --acc:#b6f23c;--acc2:#7fb81f;--up:#3ddc84;--dn:#ff5c6c;--warn:#f5c542;
+  --mono:'JetBrains Mono',ui-monospace,monospace;--sans:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13px}
+body{padding:16px;max-width:1500px;margin:0 auto}
+.mono{font-family:var(--mono)}
+.lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:12px 16px}
+.logo{width:34px;height:34px;border-radius:8px;background:var(--acc);display:grid;place-items:center;color:#0b0d0a;font-weight:800;font-family:var(--mono)}
+h1{font-size:18px;margin:0}
+.sub{font-family:var(--mono);font-size:10px;color:var(--acc);letter-spacing:.1em}
+.chip{font-family:var(--mono);font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);white-space:nowrap}
+.chip.paper{border-color:var(--warn);color:var(--warn)}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--acc);margin-right:6px;box-shadow:0 0 8px var(--acc);animation:pulse 1.6s infinite}
+.dot.off{background:var(--dn);box-shadow:0 0 8px var(--dn)}
+@keyframes pulse{50%{opacity:.35}}
+.grow{flex:1}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:12px 0}
+.kpi{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:12px 14px}
+.kpi .v{font-family:var(--mono);font-size:24px;font-weight:700;margin-top:6px}
+.kpi .s{font-family:var(--mono);font-size:11px;color:var(--mute);margin-top:4px}
+.up{color:var(--up)}.dn{color:var(--dn)}.acc{color:var(--acc)}.warn{color:var(--warn)}
+.grid{display:grid;grid-template-columns:1.55fr 1fr;gap:12px}
+.panel{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:12px 14px;min-width:0}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+th{text-align:right;font-weight:500;color:var(--mute);font-size:10px;letter-spacing:.08em;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{text-align:right;padding:6px 8px;border-bottom:1px solid #1a2016;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+tr.sig td{background:rgba(182,242,60,.08)}
+.st{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;letter-spacing:.06em}
+.st.SIGNAL{background:var(--acc);color:#0b0d0a}.st.READY{background:rgba(245,197,66,.15);color:var(--warn)}
+.st.WATCH{background:rgba(125,138,114,.15);color:var(--mute)}.st.OFF{color:var(--dim)}.st.HOLD{background:rgba(61,220,132,.15);color:var(--up)}
+.checks{display:inline-flex;gap:3px}
+.checks i{width:9px;height:9px;border-radius:2px;background:var(--line);display:inline-block}
+.checks i.on{background:var(--acc)}
+.pos{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:10px;margin-bottom:8px;font-family:var(--mono);font-size:12px}
+.pos .row{display:flex;justify-content:space-between;margin-top:3px}
+.bar{height:6px;background:var(--line);border-radius:3px;position:relative;margin-top:8px;overflow:hidden}
+.bar b{position:absolute;top:0;bottom:0;background:var(--acc)}
+.bar u{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink)}
+.log{font-family:var(--mono);font-size:11px;max-height:320px;overflow-y:auto}
+.log div{padding:4px 0;border-bottom:1px dashed #1c2317;display:flex;gap:8px}
+.log .t{color:var(--dim);min-width:92px}
+.tag{font-size:9px;padding:1px 5px;border-radius:3px;border:1px solid var(--line);color:var(--mute)}
+.tag.live{border-color:var(--acc);color:var(--acc)}
+canvas{width:100%;height:200px;display:block}
+.bottom{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-top:12px}
+.rules{font-size:12px;line-height:1.6;color:#c6d0bb}
+.rules li{margin-bottom:2px}
+.bt td,.bt th{padding:5px 6px}
+label{display:block;margin:8px 0 4px}
+input,select{width:100%;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px;font-family:var(--mono)}
+button{width:100%;margin-top:10px;background:var(--acc);color:#0b0d0a;border:0;border-radius:6px;padding:9px;font-weight:700;cursor:pointer;font-family:var(--mono)}
+button.ghost{background:transparent;color:var(--mute);border:1px solid var(--line)}
+.note{font-size:11px;color:var(--mute);line-height:1.5;margin-top:10px}
+.empty{color:var(--dim);font-family:var(--mono);font-size:12px;padding:10px 0}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.grid,.bottom{grid-template-columns:1fr}}
+@media (max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}.kpi .v{font-size:19px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">MH</div>
+  <div><h1>Meme Hunter</h1><div class="sub">BREAKOUT 1H · 22 MEME COIN · BINANCE SPOT</div></div>
+  <span class="chip paper">PAPER TRADING · tanpa order sungguhan</span>
+  <div class="grow"></div>
+  <span class="chip" id="btc">BTC —</span>
+  <span class="chip" id="conn"><span class="dot off"></span>menghubungkan…</span>
+  <span class="chip mono" id="clock">--:--:-- UTC</span>
+</header>
+
+<section class="kpis">
+  <div class="kpi"><div class="lbl">Equity</div><div class="v" id="k-eq">—</div><div class="s" id="k-eq-s">modal awal —</div></div>
+  <div class="kpi"><div class="lbl">Net PnL</div><div class="v" id="k-pnl">—</div><div class="s" id="k-pnl-s">—</div></div>
+  <div class="kpi"><div class="lbl">Win rate</div><div class="v" id="k-wr">—</div><div class="s" id="k-wr-s">—</div></div>
+  <div class="kpi"><div class="lbl">Profit factor</div><div class="v" id="k-pf">—</div><div class="s">&gt;1 = untung setelah biaya</div></div>
+  <div class="kpi"><div class="lbl">Max drawdown</div><div class="v" id="k-dd">—</div><div class="s">penurunan terdalam dari puncak</div></div>
+  <div class="kpi"><div class="lbl">Posisi terbuka</div><div class="v" id="k-op">—</div><div class="s" id="k-op-s">maks 3 sekaligus</div></div>
+</section>
+
+<section class="grid">
+  <div class="panel">
+    <div class="ph"><span class="lbl">Scanner · candle 1H terakhir yang sudah close</span><span class="lbl" id="scan-t">—</span></div>
+    <div class="scroll"><table>
+      <thead><tr><th>Coin</th><th>Harga</th><th>24j</th><th>Tren</th><th>Ke high 48j</th><th>Volume ×</th><th>Syarat</th><th>Status</th></tr></thead>
+      <tbody id="scan"></tbody>
+    </table></div>
+    <div class="note">Syarat (kiri ke kanan): <b>tren</b> EMA20 &gt; EMA50 &gt; EMA200 · <b>BTC</b> di atas EMA50 · <b>breakout</b> close &gt; high 48 jam · <b>volume</b> ≥ 2,5× rata-rata. Keempatnya harus terpenuhi → <span class="st SIGNAL">SIGNAL</span>, lalu beli di open candle berikutnya.</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+    <div class="panel">
+      <div class="ph"><span class="lbl">Posisi terbuka</span><span class="lbl" id="pos-n"></span></div>
+      <div id="positions"></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><span class="lbl">Log keputusan</span><span class="lbl" id="log-n"></span></div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+</section>
+
+<section class="bottom">
+  <div class="panel">
+    <div class="ph"><span class="lbl">Kurva equity (termasuk posisi terbuka)</span><span class="lbl" id="eq-range"></span></div>
+    <canvas id="curve"></canvas>
+  </div>
+  <div class="panel">
+    <div class="lbl" style="margin-bottom:8px">Aturan &amp; bukti backtest</div>
+    <ul class="rules" style="padding-left:16px;margin:0">
+      <li>Stop loss 1,5× ATR · take profit 3× ATR (rasio 1:2)</li>
+      <li>Keluar paksa setelah 48 jam</li>
+      <li>Risiko 1% equity per transaksi, ukuran posisi maks 30%</li>
+      <li>Biaya dihitung 0,15% per sisi (fee + slippage)</li>
+    </ul>
+    <table class="bt" style="margin-top:10px">
+      <thead><tr><th>Periode</th><th>Trade</th><th>WR</th><th>PF</th><th>Return</th></tr></thead>
+      <tbody>
+        <tr><td>In-sample 36h</td><td>55</td><td>55%</td><td>1,66</td><td class="up">+19,9%</td></tr>
+        <tr><td>Out-sample 24h</td><td>35</td><td>46%</td><td>1,53</td><td class="up">+9,7%</td></tr>
+        <tr><td>Scalp 5m (ditolak)</td><td>223</td><td>20%</td><td>0,53</td><td class="dn">−22,9%</td></tr>
+      </tbody>
+    </table>
+    <div class="note">h = hari. Data Binance 60 hari. Sampelnya kecil; hasil masa lalu tidak menjamin hasil ke depan.</div>
+  </div>
+  <div class="panel">
+    <div class="lbl">Pengaturan simulasi</div>
+    <label class="lbl" for="cap">Modal awal (USDT)</label>
+    <input id="cap" type="number" min="10" step="10">
+    <label class="lbl" for="risk">Risiko per trade (%)</label>
+    <select id="risk"><option value="0.5">0,5%</option><option value="1">1% (disarankan)</option><option value="2">2% (agresif)</option></select>
+    <label class="lbl" for="startSel">Mulai dari</label>
+    <select id="startSel"><option value="0">Sekarang (live saja)</option><option value="7">Replay 7 hari terakhir</option><option value="30">Replay 30 hari terakhir</option></select>
+    <button id="apply">Terapkan &amp; mulai ulang</button>
+    <div class="note">Label <span class="tag">REPLAY</span> = transaksi yang disimulasikan dari data sebelum Anda menekan tombol. <span class="tag live">LIVE</span> = sesudahnya. Hasil dihitung ulang dari data Binance setiap menit, jadi tab tidak perlu terbuka terus.</div>
+  </div>
+</section>
+
+<script>
+const API='https://data-api.binance.vision/api/v3';
+const COINS='PEPE WIF BONK FLOKI SHIB DOGE BOME MEME PEOPLE TURBO NEIRO 1000SATS PNUT ACT TRUMP PENGU DOGS NOT 1MBABYDOGE 1000CHEEMS BROCCOLI714 MUBARAK'.split(' ').map(s=>s+'USDT');
+const ALL=[...COINS,'BTCUSDT'];
+const P={n:48,vk:2.5,sl:1.5,tp:3,T:48,maxpos:3,cap:0.30,fee:0.0015};
+const H=3600000, WARM=400;
+const $=id=>document.getElementById(id);
+const floorH=t=>Math.floor(t/H)*H;
+
+// ---------- settings (per-viewer, local) ----------
+function loadS(){try{return JSON.parse(localStorage.getItem('mh.settings'))}catch(e){return null}}
+function saveS(){try{localStorage.setItem('mh.settings',JSON.stringify(S))}catch(e){}}
+let S=loadS()||{capital:1000,risk:1,days:30,activated:Date.now()};
+S.start=floorH(S.activated-S.days*86400000);
+
+// ---------- data ----------
+const K={};       // sym -> {t,o,h,l,c,v}
+const LIVE={};    // sym -> last price
+const T24={};     // sym -> 24h change %
+async function j(u){const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json()}
+function put(sym,rows){
+  const d=K[sym]||(K[sym]={t:[],o:[],h:[],l:[],c:[],v:[]});
+  for(const r of rows){
+    const t=r[0],k=d.t.length?d.t.indexOf(t,Math.max(0,d.t.length-5)):-1;
+    const vals=[+r[1],+r[2],+r[3],+r[4],+r[7]];
+    if(k>=0){['o','h','l','c','v'].forEach((f,x)=>d[f][k]=vals[x])}
+    else if(!d.t.length||t>d.t[d.t.length-1]){d.t.push(t);['o','h','l','c','v'].forEach((f,x)=>d[f].push(vals[x]))}
+  }
+}
+async function loadHistory(sym){
+  let t=S.start-WARM*H;
+  while(true){
+    const r=await j(`${API}/klines?symbol=${sym}&interval=1h&startTime=${t}&limit=1000`);
+    put(sym,r); if(r.length<1000)break; t=r[r.length-1][0]+H;
+  }
+}
+async function refreshBars(){
+  await Promise.all(ALL.map(async s=>put(s,await j(`${API}/klines?symbol=${s}&interval=1h&limit=3`))));
+}
+async function refreshPrices(){
+  const r=await j(`${API}/ticker/price?symbols=${encodeURIComponent(JSON.stringify(ALL))}`);
+  r.forEach(x=>LIVE[x.symbol]=+x.price);
+}
+async function refresh24(){
+  const r=await j(`${API}/ticker/24hr?type=MINI&symbols=${encodeURIComponent(JSON.stringify(ALL))}`);
+  r.forEach(x=>T24[x.symbol]=(+x.lastPrice/+x.openPrice-1)*100);
+}
+
+// ---------- indicators (identical to backtest.py) ----------
+function ema(a,n){const k=2/(n+1),o=[a[0]];for(let i=1;i<a.length;i++)o.push(o[i-1]+k*(a[i]-o[i-1]));return o}
+function ind(d){
+  const tr=d.c.map((c,i)=>i?Math.max(d.h[i]-d.l[i],Math.abs(d.h[i]-d.c[i-1]),Math.abs(d.l[i]-d.c[i-1])):d.h[0]-d.l[0]);
+  d.e20=ema(d.c,20);d.e50=ema(d.c,50);d.e200=ema(d.c,200);d.atr=ema(tr,14);d.vav=ema(d.v,20);
+  d.idx=new Map(d.t.map((t,i)=>[t,i]));
+}
+function checks(d,i,btcOk){
+  const hh=Math.max(...d.h.slice(i-P.n,i));
+  return {trend:d.e20[i]>d.e50[i]&&d.e50[i]>d.e200[i], btc:!!btcOk, brk:d.c[i]>hh, vol:d.v[i]>P.vk*d.vav[i-1], hh};
+}
+
+// ---------- deterministic replay engine ----------
+let R=null;
+function replay(){
+  const now=Date.now(), bt=K.BTCUSDT; if(!bt)return;
+  ALL.forEach(s=>K[s]&&ind(K[s]));
+  const btcOk=t=>{const i=bt.idx.get(t);return i!=null&&bt.c[i]>bt.e50[i]};
+  let eq=S.capital,peak=eq,mdd=0;const pos={},trades=[],curve=[],log=[];
+  const times=bt.t.filter(t=>t>=S.start);
+  for(const t of times){
+    const forming=t+H>now;
+    for(const s of Object.keys(pos)){
+      const d=K[s],i=d.idx.get(t);if(i==null)continue;
+      const p=pos[s];p.bars++;let x=null,why='';
+      if(d.l[i]<=p.sl){x=Math.min(p.sl,d.o[i]);why='STOP LOSS'}
+      else if(d.h[i]>=p.tp){x=Math.max(p.tp,d.o[i]);why='TAKE PROFIT'}
+      else if(!forming&&p.bars>=P.T){x=d.c[i];why='BATAS 48 JAM'}
+      if(x!=null){
+        const r=(x*(1-P.fee))/(p.e*(1+P.fee))-1,pnl=p.val*r;eq+=pnl;
+        const tx=forming?Math.min(now,t+H-1):t+H;
+        trades.push({...p,s,x,r,pnl,tx,why});delete pos[s];
+        log.push({t:tx,live:tx>=S.activated,kind:pnl>0?'win':'loss',msg:`JUAL ${s.replace('USDT','')} @ ${fp(x)} · ${why} · ${pnl>=0?'+':''}${pnl.toFixed(2)} USDT (${(r*100).toFixed(2)}%)`});
+      }
+    }
+    for(const s of COINS){
+      const d=K[s];if(!d||pos[s])continue;const i=d.idx.get(t);if(i==null||i<210)continue;
+      const c=checks(d,i-1,btcOk(d.t[i-1]));
+      if(!(c.trend&&c.btc&&c.brk&&c.vol)||!(d.atr[i-1]>0))continue;
+      if(Object.keys(pos).length>=P.maxpos){log.push({t,live:t>=S.activated,kind:'skip',msg:`LEWATI ${s.replace('USDT','')} · sinyal valid tapi sudah ${P.maxpos} posisi`});continue}
+      const e=d.o[i],sd=P.sl*d.atr[i-1],td=P.tp*d.atr[i-1];
+      const val=Math.min(eq*(S.risk/100)/(sd/e+2*P.fee),eq*P.cap);
+      pos[s]={e,sl:e-sd,tp:e+td,bars:0,val,t,live:t>=S.activated};
+      log.push({t,live:t>=S.activated,kind:'buy',msg:`BELI ${s.replace('USDT','')} @ ${fp(e)} · ${val.toFixed(0)} USDT · SL ${fp(e-sd)} · TP ${fp(e+td)} · vol ${(d.v[i-1]/d.vav[i-2]).toFixed(1)}×`});
+    }
+    let m=eq;for(const s in pos){const d=K[s],i=d.idx.get(t);const px=(forming&&LIVE[s])||d.c[i];m+=pos[s].val*((px*(1-P.fee))/(pos[s].e*(1+P.fee))-1)}
+    curve.push([t,m]);peak=Math.max(peak,m);mdd=Math.max(mdd,(peak-m)/peak);
+  }
+  R={eq,pos,trades,curve,log:log.reverse(),mdd,btcOk};
+}
+
+// ---------- render ----------
+function fp(x){if(!x&&x!==0)return'—';return x>=100?x.toFixed(2):x>=1?x.toFixed(4):x>=0.01?x.toFixed(5):x.toPrecision(4)}
+const pct=x=>(x>=0?'+':'')+x.toFixed(2)+'%';
+const ts=t=>new Date(t).toISOString().slice(5,16).replace('T',' ');
+function render(){
+  if(!R)return;
+  const last=R.curve.length?R.curve[R.curve.length-1][1]:S.capital, pnl=last-S.capital;
+  const n=R.trades.length,w=R.trades.filter(x=>x.pnl>0),gp=w.reduce((a,x)=>a+x.pnl,0),gl=-R.trades.filter(x=>x.pnl<=0).reduce((a,x)=>a+x.pnl,0);
+  $('k-eq').textContent='$'+last.toFixed(2);$('k-eq-s').textContent=`modal awal $${S.capital}`;
+  $('k-pnl').textContent=(pnl>=0?'+$':'−$')+Math.abs(pnl).toFixed(2);$('k-pnl').className='v '+(pnl>=0?'up':'dn');
+  $('k-pnl-s').textContent=pct(pnl/S.capital*100)+` sejak ${ts(S.start)} UTC`;
+  $('k-wr').textContent=n?Math.round(w.length/n*100)+'%':'—';$('k-wr-s').textContent=`${w.length} menang / ${n} trade`;
+  $('k-pf').textContent=gl?(gp/gl).toFixed(2):(n?'∞':'—');$('k-pf').className='v '+(gl&&gp/gl<1?'dn':'acc');
+  $('k-dd').textContent=(R.mdd*100).toFixed(1)+'%';
+  const op=Object.keys(R.pos).length;$('k-op').textContent=`${op} / ${P.maxpos}`;
+
+  // scanner
+  const bt=K.BTCUSDT,bi=lastClosed(bt),bOk=bt.c[bi]>bt.e50[bi];
+  $('btc').innerHTML=`BTC ${fp(LIVE.BTCUSDT||bt.c[bt.c.length-1])} · <span class="${bOk?'up':'dn'}">${bOk?'REGIME OK':'REGIME OFF'}</span>`;
+  $('scan-t').textContent='bar '+ts(bt.t[bi])+' UTC';
+  const rows=COINS.filter(s=>K[s]).map(s=>{
+    const d=K[s],i=lastClosed(d),c=checks(d,i,bOk);
+    const dist=(c.hh/d.c[i]-1)*100,vr=d.v[i]/d.vav[i-1];
+    const ok=[c.trend,c.btc,c.brk,c.vol];const all=ok.every(Boolean);
+    let st=R.pos[s]?'HOLD':all?'SIGNAL':(c.trend&&c.btc&&dist<3)?'READY':c.trend?'WATCH':'OFF';
+    return {s,d,i,c,dist,vr,ok,st,rank:{HOLD:0,SIGNAL:1,READY:2,WATCH:3,OFF:4}[st]+(dist/100)};
+  }).sort((a,b)=>a.rank-b.rank);
+  $('scan').innerHTML=rows.map(r=>{const ch=T24[r.s];return`<tr class="${r.st==='SIGNAL'?'sig':''}">
+    <td><b>${r.s.replace('USDT','')}</b></td><td>${fp(LIVE[r.s]||r.d.c[r.i])}</td>
+    <td class="${ch>=0?'up':'dn'}">${ch==null?'—':pct(ch)}</td>
+    <td class="${r.c.trend?'up':'dn'}">${r.c.trend?'NAIK':'—'}</td>
+    <td>${r.c.brk?'<span class="acc">TEMBUS</span>':r.dist.toFixed(2)+'%'}</td>
+    <td class="${r.vr>=P.vk?'acc':''}">${r.vr.toFixed(1)}×</td>
+    <td><span class="checks">${r.ok.map(o=>`<i class="${o?'on':''}"></i>`).join('')}</span></td>
+    <td><span class="st ${r.st}">${r.st}</span></td></tr>`}).join('');
+
+  // positions
+  $('pos-n').textContent=op?`${op} terbuka`:'';
+  $('positions').innerHTML=op?Object.entries(R.pos).map(([s,p])=>{
+    const px=LIVE[s]||K[s].c[K[s].c.length-1],r=(px*(1-P.fee))/(p.e*(1+P.fee))-1;
+    const span=p.tp-p.sl,at=Math.max(0,Math.min(1,(px-p.sl)/span)),en=(p.e-p.sl)/span;
+    const left=Math.max(0,P.T-p.bars);
+    return`<div class="pos"><div class="row"><b>${s.replace('USDT','')}</b><span class="${r>=0?'up':'dn'}">${pct(r*100)} · ${(p.val*r>=0?'+':'')}${(p.val*r).toFixed(2)} USDT</span></div>
+      <div class="row" style="color:var(--mute)"><span>entry ${fp(p.e)} · ${p.val.toFixed(0)} USDT</span><span>sisa ±${left} jam</span></div>
+      <div class="bar"><b style="left:${en*100}%;width:${Math.max(0,at-en)*100}%"></b><u style="left:${at*100}%"></u></div>
+      <div class="row" style="color:var(--mute);font-size:10px"><span class="dn">SL ${fp(p.sl)}</span><span>harga ${fp(px)}</span><span class="up">TP ${fp(p.tp)}</span></div></div>`}).join('')
+    :'<div class="empty">Belum ada posisi. Bot menunggu keempat syarat terpenuhi. Menunggu adalah bagian dari strategi.</div>';
+
+  // log
+  $('log-n').textContent=R.log.length+' kejadian';
+  const col={win:'up',loss:'dn',buy:'acc',skip:'warn'};
+  $('log').innerHTML=R.log.length?R.log.slice(0,150).map(l=>`<div><span class="t">${ts(l.t)}</span><span class="tag ${l.live?'live':''}">${l.live?'LIVE':'REPLAY'}</span><span class="${col[l.kind]}">${l.msg}</span></div>`).join('')
+    :'<div class="empty">Belum ada keputusan sejak mulai.</div>';
+  drawCurve();
+}
+function lastClosed(d){let i=d.t.length-1;while(i>0&&d.t[i]+H>Date.now())i--;return i}
+function drawCurve(){
+  const cv=$('curve'),dpr=devicePixelRatio||1,W=cv.clientWidth,Hh=cv.clientHeight;cv.width=W*dpr;cv.height=Hh*dpr;
+  const g=cv.getContext('2d');g.scale(dpr,dpr);g.clearRect(0,0,W,Hh);
+  const pts=R.curve;if(pts.length<2)return;
+  let lo=Math.min(S.capital,...pts.map(p=>p[1])),hi=Math.max(S.capital,...pts.map(p=>p[1]));const pad=(hi-lo)*.1||1;lo-=pad;hi+=pad;
+  const X=i=>44+i/(pts.length-1)*(W-52),Y=v=>8+(hi-v)/(hi-lo)*(Hh-26);
+  g.font='10px JetBrains Mono';g.fillStyle='#4c5644';g.strokeStyle='#1a2016';
+  for(let k=0;k<=3;k++){const v=lo+(hi-lo)*k/3,y=Y(v);g.beginPath();g.moveTo(44,y);g.lineTo(W-8,y);g.stroke();g.fillText('$'+v.toFixed(0),2,y+3)}
+  g.setLineDash([4,4]);g.strokeStyle='#7d8a72';g.beginPath();g.moveTo(44,Y(S.capital));g.lineTo(W-8,Y(S.capital));g.stroke();g.setLineDash([]);
+  const ai=pts.findIndex(p=>p[0]>=S.activated);
+  if(ai>0){g.fillStyle='rgba(182,242,60,.05)';g.fillRect(X(ai),8,W-8-X(ai),Hh-26);g.fillStyle='#b6f23c';g.fillText('LIVE →',X(ai)+4,20)}
+  const grad=g.createLinearGradient(0,0,0,Hh);grad.addColorStop(0,'rgba(182,242,60,.25)');grad.addColorStop(1,'rgba(182,242,60,0)');
+  g.beginPath();pts.forEach((p,i)=>i?g.lineTo(X(i),Y(p[1])):g.moveTo(X(i),Y(p[1])));
+  g.lineTo(X(pts.length-1),Hh-18);g.lineTo(X(0),Hh-18);g.fillStyle=grad;g.fill();
+  g.beginPath();pts.forEach((p,i)=>i?g.lineTo(X(i),Y(p[1])):g.moveTo(X(i),Y(p[1])));g.strokeStyle='#b6f23c';g.lineWidth=1.6;g.stroke();
+  g.fillStyle='#4c5644';g.fillText(ts(pts[0][0]),44,Hh-4);const e=ts(pts[pts.length-1][0]);g.fillText(e,W-8-g.measureText(e).width,Hh-4);
+  $('eq-range').textContent=`${pts.length} jam`;
+}
+function conn(ok,msg){$('conn').innerHTML=`<span class="dot ${ok?'':'off'}"></span>${msg}`}
+setInterval(()=>{$('clock').textContent=new Date().toISOString().slice(11,19)+' UTC'},1000);
+
+// ---------- settings UI ----------
+$('cap').value=S.capital;$('risk').value=String(S.risk);$('startSel').value=String(S.days);
+$('apply').onclick=()=>{
+  S={capital:Math.max(10,+$('cap').value||1000),risk:+$('risk').value,days:+$('startSel').value,activated:Date.now()};
+  saveS();location.reload();
+};
+
+// ---------- boot ----------
+(async()=>{
+  saveS();
+  try{
+    conn(false,'memuat data 1H…');
+    let done=0;
+    await Promise.all(ALL.map(async s=>{await loadHistory(s);conn(false,`memuat ${++done}/${ALL.length}`)}));
+    await Promise.all([refreshPrices(),refresh24()]);
+    replay();render();conn(true,'LIVE · Binance');
+  }catch(e){conn(false,'gagal memuat: '+e.message);console.error(e);return}
+  setInterval(async()=>{try{await refreshPrices();render();conn(true,'LIVE · Binance')}catch(e){conn(false,'koneksi terputus')}},5000);
+  setInterval(async()=>{try{await Promise.all([refreshBars(),refresh24()]);replay();render()}catch(e){conn(false,'koneksi terputus')}},60000);
+  addEventListener('resize',()=>R&&drawCurve());
+})();
+</script>
+</body>
+</html>
